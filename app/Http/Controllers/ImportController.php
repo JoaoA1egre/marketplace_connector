@@ -19,8 +19,30 @@ class ImportController extends Controller
         ImportAdsJob::dispatch($importJob);
 
         return response()->json([
-            'message' => 'Importação agendada com sucesso!',
-            'importJobId' => $importJob->id,
+            'success' => true,
+            'data' => [
+                'message' => 'Importação agendada com sucesso!',
+                'importJobId' => $importJob->id,
+            ],
+        ], 201);
+    }
+
+    public function getImportJobStatus($id): JsonResponse
+    {
+        $importJob = ImportJob::find($id);
+
+        if (!$importJob) {
+            return response()->json([
+                'success' => false,
+                'error' => 'ImportJob não encontrado.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'status' => $importJob->status,
+            ],
         ]);
     }
 }

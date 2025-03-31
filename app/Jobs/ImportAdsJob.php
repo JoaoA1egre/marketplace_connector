@@ -14,7 +14,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-Const APIURL = 'http://172.23.0.4:3000';
+Const APIURL = 'http://mockoon:3000';
 
 class ImportAdsJob implements ShouldQueue
 {

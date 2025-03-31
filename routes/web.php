@@ -8,3 +8,5 @@ Route::get('/welcome', function () {
 });
 
 Route::get('/importAds',[ImportController::class, 'importAds']);
+
+Route::get('/importAds/{id}', [ImportController::class, 'getImportJobStatus']);
