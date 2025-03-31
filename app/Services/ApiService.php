@@ -9,10 +9,27 @@ class ApiService implements ApiServiceInterface
     const APIURL = 'http://mockoon:3000';
 
     public function getOffers(int $page): array
-    {
-        $response = Http::get(self::APIURL . '/offers', ['page' => $page]);
-        return $response->json();
-    }
+{
+    $offers = [];
+    $currentPage = $page;
+
+    do {
+        $response = Http::get(self::APIURL . '/offers', ['page' => $currentPage]);
+        $responseData = $response->json();
+        
+        $currentOffers = $responseData['data']['offers'] ?? [];
+        
+        if (!empty($currentOffers)) {
+            $offers = array_merge($offers, $currentOffers);
+        } else {
+            break;
+        }
+        
+        $currentPage = $responseData['pagination']['next_page'] ?? null;
+    } while ($currentPage);
+
+    return $offers;
+}
 
     public function getOfferDetails(string $offerId): array
     {

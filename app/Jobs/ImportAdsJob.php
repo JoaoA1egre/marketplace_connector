@@ -32,7 +32,7 @@ class ImportAdsJob implements ShouldQueue
         try {
             $offers = $this->apiService->getOffers(1);
 
-            foreach ($offers['data']['offers'] as $offerId) {
+            foreach ($offers as $offerId) {
                 $detailedOffer = $this->apiService->getOfferDetails($offerId);
                 $priceData = $this->apiService->getOfferPrices($offerId);
 
