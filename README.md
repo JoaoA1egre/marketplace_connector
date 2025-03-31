@@ -6,15 +6,13 @@ O **Marketplace Connector** é um sistema desenvolvido para integrar a API de um
 
 - [Introdução](#introdução)
 - [Funcionalidades](#funcionalidades)
-- [Requisitos](#requisitos)
-  - [Funcionais](#requisitos-funcionais)
-  - [Técnicos](#requisitos-técnicos)
 - [Arquitetura e Design](#arquitetura-e-design)
 - [Instalação](#instalação)
 - [Configuração e Execução](#configuração-e-execução)
 - [Endpoints e Uso](#endpoints-e-uso)
-- [Observabilidade](#observabilidade)
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
+- [Observabilidade](#observabilidade)
+- [Extras](#Extras)
 - [Licença](#licença)
 
 ## Introdução
@@ -136,10 +134,6 @@ docker run -d --mount type=bind,source=./mocketplace.json,target=/data,readonly 
 }
 ```
 
-## Observabilidade
-
-- **Logs:** Utiliza o sistema de logs do Laravel para registrar eventos críticos.
-
 ## Tecnologias Utilizadas
 
 - Laravel
@@ -149,7 +143,11 @@ docker run -d --mount type=bind,source=./mocketplace.json,target=/data,readonly 
 - Mockoon
 - Padrões: Clean Architecture, State Pattern
 
-## Observações
+## Observabilidade
+
+- **Logs:** Utiliza o sistema de logs do Laravel para registrar eventos críticos.
+
+## Extras
 
 ### Execução Manual da Job `ImportAdsJob`
 
