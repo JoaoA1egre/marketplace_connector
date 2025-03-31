@@ -1,30 +1,26 @@
 <?php
-
 namespace App\Jobs;
 
 use App\Models\Ads;
 use App\Models\ImportJob;
-use App\States\ProcessingState;
-use App\States\CompletedState;
-use App\States\PendingState;
-use Illuminate\Support\Facades\Http;
+use App\Services\ApiServiceInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-Const APIURL = 'http://mockoon:3000';
-
 class ImportAdsJob implements ShouldQueue
 {
     use Queueable, Dispatchable, InteractsWithQueue, SerializesModels;
 
     protected $importJob;
+    protected $apiService;
 
-    public function __construct(ImportJob $importJob)
+    public function __construct(ImportJob $importJob, ApiServiceInterface $apiService)
     {
         $this->importJob = $importJob;
+        $this->apiService = $apiService;
     }
 
     public function handle()
@@ -32,40 +28,32 @@ class ImportAdsJob implements ShouldQueue
         \Log::info('Estado atualizado para processing.');
 
         $this->importJob->setState('processing');
-        
-        try {
 
-            $response = Http::get(APIURL.'/offers', [
-                'page' => 1,
-            ]);
-    
-            $offers = $response->json();
+        try {
+            $offers = $this->apiService->getOffers(1);
 
             foreach ($offers['data']['offers'] as $offerId) {
-                $detailedResponse = Http::get(APIURL."/offers/{$offerId}");
-                $price = Http::get(APIURL."/offers/{$offerId}/prices");
+                $detailedOffer = $this->apiService->getOfferDetails($offerId);
+                $priceData = $this->apiService->getOfferPrices($offerId);
 
-                if ($detailedResponse->successful()) {
-                $detailedOffer = $detailedResponse->json();
-                $priceData = $price->json();
+                if ($detailedOffer) {
+                    \Log::info('Enviando oferta para o HUB:');
+                    $this->apiService->createHubOffer([
+                        'title' => $detailedOffer['data']['title'],
+                        'description' => $detailedOffer['data']['description'],
+                        'status' => $detailedOffer['data']['status'],
+                        'stock' => $detailedOffer['data']['stock'],
+                    ]);
 
-                \Log::info('Enviando oferta para o HUB:');
-                Http::post(APIURL.'/hub/create-offer', [
-                    'title' => $detailedOffer['data']['title'],
-                    'description' => $detailedOffer['data']['description'],
-                    'status' => $detailedOffer['data']['status'],
-                    'stock' => $detailedOffer['data']['stock'],
-                ]);
-
-                Ads::updateOrCreate(
-                    ['marketplace_id' => $detailedOffer['data']['id']], // Garantindo que não haja duplicidade
-                    [
-                    'title' => $detailedOffer['data']['title'],
-                    'description' => $detailedOffer['data']['description'],
-                    'price' => $priceData['data']['price'],
-                    'updated_at' => now(),
-                    ]
-                );
+                    Ads::updateOrCreate(
+                        ['marketplace_id' => $detailedOffer['data']['id']],
+                        [
+                            'title' => $detailedOffer['data']['title'],
+                            'description' => $detailedOffer['data']['description'],
+                            'price' => $priceData['data']['price'],
+                            'updated_at' => now(),
+                        ]
+                    );
                 }
             }
 

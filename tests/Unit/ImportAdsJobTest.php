@@ -5,53 +5,53 @@ namespace Tests\Unit;
 use Tests\TestCase;
 use App\Jobs\ImportAdsJob;
 use App\Models\ImportJob;
-use Illuminate\Support\Facades\Http;
+use App\Services\ApiServiceInterface;
+use Illuminate\Support\Facades\Log;
+use Mockery;
 
 class ImportAdsJobTest extends TestCase
 {
     public function test_import_ads_job_process()
     {
+        Log::shouldReceive('info')->atLeast()->once();
+        Log::shouldReceive('error')->never();
 
-        $importJob = ImportJob::create([
-            'status' => 'pending',
-        ]);
-
-        Http::fake([
-            'http://mockoon:3000/offers' => Http::response([
-                'data' => ['offers' => [1, 2]]
-            ], 200),
-            'http://mockoon:3000/offers/1' => Http::response([
-                'data' => [
-                    'id' => 1,
-                    'title' => 'Produto 1',
-                    'description' => 'Descrição do Produto 1',
-                    'status' => 'active',
-                    'stock' => 10
-                ]
-            ], 200),
-            'http://mockoon:3000/offers/2' => Http::response([
-                'data' => [
-                    'id' => 2,
-                    'title' => 'Produto 2',
-                    'description' => 'Descrição do Produto 2',
-                    'status' => 'inactive',
-                    'stock' => 5
-                ]
-            ], 200),
-            'http://mockoon:3000/offers/1/prices' => Http::response([
-                'data' => ['price' => 100]
-            ], 200),
-            'http://mockoon:3000/offers/2/prices' => Http::response([
-                'data' => ['price' => 200]
-            ], 200),
-            'http://mockoon:3000/hub/create-offer' => Http::response([], 201),
-        ]);
-
-        $job = new ImportAdsJob($importJob);
+        $importJob = new ImportJob();
+        $importJob->status = 'pending';
+        $importJob->save();
+        
+        $mockApiService = Mockery::mock(ApiServiceInterface::class);
+        
+        $mockApiService->shouldReceive('getOffers')
+            ->once()
+            ->andReturn(['data' => ['offers' => [1, 2]]]);
+        
+        $mockApiService->shouldReceive('getOfferDetails')
+            ->twice()
+            ->andReturnUsing(function ($offerId) {
+                return [
+                    'data' => [
+                        'id' => $offerId,
+                        'title' => "Produto $offerId",
+                        'description' => "Descrição do Produto $offerId",
+                        'status' => 'active',
+                        'stock' => 10
+                    ]
+                ];
+            });
+        
+        $mockApiService->shouldReceive('getOfferPrices')
+            ->twice()
+            ->andReturnUsing(function ($offerId) {
+                return ['data' => ['price' => $offerId * 100]];
+            });
+        
+        $mockApiService->shouldReceive('createHubOffer')->twice()->andReturn(true);
+        
+        $job = new ImportAdsJob($importJob, $mockApiService);
         $job->handle();
-
+        
         $importJob->refresh();
         $this->assertEquals('completed', $importJob->status);
-
     }
 }
