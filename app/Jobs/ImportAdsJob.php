@@ -32,12 +32,13 @@ class ImportAdsJob implements ShouldQueue
         \Log::info('Estado atualizado para processing.');
 
         $this->importJob->setState('processing');
+        
+        try {
 
-        $response = Http::get(APIURL.'/offers', [
-            'page' => 1,
-        ]);
-
-        if ($response->successful()) {
+            $response = Http::get(APIURL.'/offers', [
+                'page' => 1,
+            ]);
+    
             $offers = $response->json();
 
             foreach ($offers['data']['offers'] as $offerId) {
@@ -45,31 +46,33 @@ class ImportAdsJob implements ShouldQueue
                 $price = Http::get(APIURL."/offers/{$offerId}/prices");
 
                 if ($detailedResponse->successful()) {
-                    $detailedOffer = $detailedResponse->json();
-                    $priceData = $price->json();
+                $detailedOffer = $detailedResponse->json();
+                $priceData = $price->json();
 
-                    \Log::info('Enviando oferta para o HUB:');
-                    Http::post(APIURL.'/hub/create-offer', [
-                        'title' => $detailedOffer['data']['title'],
-                        'description' => $detailedOffer['data']['description'],
-                        'status' => $detailedOffer['data']['status'],
-                        'stock' => $detailedOffer['data']['stock'],
-                    ]);
+                \Log::info('Enviando oferta para o HUB:');
+                Http::post(APIURL.'/hub/create-offer', [
+                    'title' => $detailedOffer['data']['title'],
+                    'description' => $detailedOffer['data']['description'],
+                    'status' => $detailedOffer['data']['status'],
+                    'stock' => $detailedOffer['data']['stock'],
+                ]);
 
-                    Ads::updateOrCreate(
-                        ['marketplace_id' => $detailedOffer['data']['id']], // Garantindo que não haja duplicidade
-                        [
-                            'title' => $detailedOffer['data']['title'],
-                            'description' => $detailedOffer['data']['description'],
-                            'price' => $priceData['data']['price'],
-                            'updated_at' => now(),
-                        ]
-                    );
+                Ads::updateOrCreate(
+                    ['marketplace_id' => $detailedOffer['data']['id']], // Garantindo que não haja duplicidade
+                    [
+                    'title' => $detailedOffer['data']['title'],
+                    'description' => $detailedOffer['data']['description'],
+                    'price' => $priceData['data']['price'],
+                    'updated_at' => now(),
+                    ]
+                );
                 }
             }
 
             $this->importJob->setState('completed');
-        } else {
+
+        } catch (\Exception $e) {
+            \Log::error('Erro durante a importação: ' . $e->getMessage());
             $this->importJob->setState('failed');
         }
     }

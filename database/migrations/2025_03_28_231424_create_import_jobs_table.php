@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('import_jobs', function (Blueprint $table) {
             $table->id();
-            $table->enum('status', ['pending', 'processing', 'completed'])->default('pending');
+            $table->enum('status', ['pending', 'processing', 'completed','failed'])->default('pending');
             $table->timestamps();
         });
     }

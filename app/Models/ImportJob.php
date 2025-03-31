@@ -20,9 +20,15 @@ class ImportJob extends Model
         };
     }
 
-    public function setState(string $newState)
+    public function setState($state)
     {
-        $this->status = $newState;
-        $this->save();
+        $allowedStates = ['processing', 'completed', 'failed'];
+        if (in_array($state, $allowedStates)) {
+            $this->status = $state;
+            $this->save();
+        } else {
+            throw new \InvalidArgumentException("Invalid state: $state");
+        }
     }
 }
+
