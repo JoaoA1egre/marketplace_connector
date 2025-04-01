@@ -151,6 +151,8 @@ docker run -d --mount type=bind,source=./mocketplace.json,target=/data,readonly 
 
 ## Extras
 
+- **Postman:** na raiz do projeto existe um arquivo json do postman com a collection contendo todas as consultas necessárias.
+
 ### Execução Manual da Job `ImportAdsJob`
 
 É possível executar a job `ImportAdsJob` manualmente dentro do seu ambiente Docker do Laravel. Esta funcionalidade foi desenvolvida para facilitar alguns testes manuais.
