@@ -1,0 +1,242 @@
+{
+	"info": {
+		"_postman_id": "0219da07-1e93-4b87-843b-e4b01b390b4a",
+		"name": "APIs MarketPlace",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10531287"
+	},
+	"item": [
+		{
+			"name": "offers",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/offers?page=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"offers"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "offer by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/offers/:ID",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"offers",
+						":ID"
+					],
+					"variable": [
+						{
+							"key": "ID",
+							"value": "2024001"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "offer image",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/offers/:ID/images",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"offers",
+						":ID",
+						"images"
+					],
+					"variable": [
+						{
+							"key": "ID",
+							"value": "2024001"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "offer prices",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/offers/:ID/prices",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"offers",
+						":ID",
+						"prices"
+					],
+					"variable": [
+						{
+							"key": "ID",
+							"value": "2024001"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "importAds",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var res = JSON.parse(responseBody);",
+							"",
+							"pm.collectionVariables.set(\"importJobId\", res.data.importJobId);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/importAds",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"importAds"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "importAdsId",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/importAds\\{{importJobId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"importAds",
+						"{{importJobId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create offer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"title\": \"string\",\n\"description\": \"string\",\n\"status\": \"string\",\n\"stock\": 999999\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/hub/create-offer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"hub",
+						"create-offer"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "importJobId",
+			"value": ""
+		}
+	]
+}
